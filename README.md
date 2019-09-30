@@ -8,7 +8,11 @@ i2nii shares the image reading functions of the [MRIcroGL](https://www.nitrc.org
 
 You can get i2nii using two methods:
 
- - (Recommended) Download latest compiled release from [Github](https://github.com/rordenlab/i2nii/releases).
+ - (Recommended) Download latest compiled release from [Github release web page](https://github.com/rordenlab/i2nii/releases).
+ - (Recommended) You can also download from the command line for Linux, MacOS and Windows:
+   * `curl -fLO https://github.com/rordenlab/i2nii/releases/latest/download/i2nii_lnx.zip`
+   * `curl -fLO https://github.com/rordenlab/i2nii/releases/latest/download/i2nii_mac.zip`
+   * `curl -fLO https://github.com/rordenlab/i2nii/releases/latest/download/i2nii_win.zip`
  - (Developers) Download the source code from [GitHub](https://github.com/rordenlab/i2nii).
 
 ## Usage
