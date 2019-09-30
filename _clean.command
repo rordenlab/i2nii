@@ -8,3 +8,5 @@ rm -rf *.nii
 rm -rf lib
 rm -rf backup
 strip i2nii
+cd test
+rm -rf *.nii
