@@ -1,0 +1,7 @@
+numDim: 3
+dim: 64 64 37
+origin: -108.281 82.3795 -47.8356
+fov: 220 220 140.6
+interval: 3.4375 3.4375 3.8
+dataType: WORD
+stimFileName: /Users/chris/src/i2nii/test/TempWritenrrd/spr.sdt

@@ -1,0 +1,27 @@
+IMAGE DESCRIPTOR FILE version 5
+studyid: TESTSLICE_20070205
+study #:    1897
+series #:      15
+position: Head First, Supine
+coil: 8HRBRAIN
+orientation:  13     axial normal
+echo/time/met index:     1     value:       1.00
+rootname: sivic
+comment:  - Zugfahrt - 02/05/2007
+filetype:   3     entry/pixel:  1     DICOM format images
+dimension:  1     columns     itype:  1
+npix:    64   fov(mm):  220.00  center(mm):    0.00  pixelsize(mm):    3.43750
+dimension:  2     rows        itype:  2
+npix:    64   fov(mm):  220.00  center(mm):  -25.90  pixelsize(mm):    3.43750
+dimension:  3     slices      itype:  3
+npix:    37   fov(mm):  140.60  center(mm):  -20.56  pixelsize(mm):    3.80000
+slice thickness (mm):        3.80000
+minimum:   0.0000e+00     maximum:   6.6900e+03
+scale:     1.000
+first slice read:    1   last slice read:  185   sliceskip:    1
+LOCATION DATA IN LPS COORDINATES
+center:        0.00025     -25.90175      20.56440
+toplc:      -108.28100    -134.18300      88.96440
+dcos1:         1.00000       0.00000       0.00000
+dcos2:         0.00000       1.00000       0.00000
+dcos3:         0.00000       0.00000      -1.00000

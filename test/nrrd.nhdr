@@ -1,0 +1,29 @@
+NRRD0005
+# Complete NRRD file format specification at:
+# http://teem.sourceforge.net/nrrd/format.html
+# dcm2niix v1.0.20190926 NRRD export transforms by Tashrif Billah
+type: int16
+dimension: 3
+space: right-anterior-superior
+sizes: 64 64 37
+thicknesses:  NaN  NaN 3.8
+endian: little
+encoding: gzip
+data file: nrrd.raw.gz
+space units: "mm" "mm" "mm"
+space origin: (108.281,-82.3795,-47.8356)
+space directions: (-3.4375,-0,0) (0,3.4375,0) (-0,-0,3.8)
+centerings: cell cell cell
+kinds: space space space
+DICOM_0008_0060_Modality:=MR
+DICOM_0008_0070_Manufacturer:=GE MEDICAL SYSTEMS
+DICOM_0008_1090_ManufacturerModelName:=SIGNA_HDx
+DICOM_0018_0022_ScanOptions:=EPI_GEMS
+DICOM_0018_0023_MRAcquisitionType:=2D
+DICOM_0018_0080_RepetitionTime:=2628
+DICOM_0018_0081_EchoTime:=40
+DICOM_0018_0083_NumberOfAverages:=1
+DICOM_0018_0087_MagneticFieldStrength:=3
+DICOM_0018_1020_SoftwareVersions:=14_LX_MR_Software_release:14.0_M4_0629.a
+DICOM_0018_1314_FlipAngle:=90
+
