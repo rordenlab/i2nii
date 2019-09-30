@@ -17,7 +17,6 @@ You can get i2nii using two methods:
 
 ## Usage
 
-
 ```
 Chris Rorden's i2nii v1.0.20190909
 usage: i2nii [options] <in_file(s)>
@@ -37,7 +36,7 @@ usage: i2nii [options] <in_file(s)>
 
 This software is provided as is. There are clear limitations.
 
- - Many of the file formats are poorly documented. In partifular with respect to spatial scale and orientation. Some of these problems are inherent to the format (e.g. [Blender Voxel data](http://pythology.blogspot.com/2014/08/you-can-do-cool-stuff-with-manual.html) contains no spatial information at all). In other cases, this software could be improved to better handle these formats. It is open source, so feel free to contribute. However, due to these limitations, one should take care using this software.
+ - Many of the file formats are poorly documented. In particular with respect to spatial scale and orientation. Some of these problems are inherent to the format (e.g. [Blender Voxel data](http://pythology.blogspot.com/2014/08/you-can-do-cool-stuff-with-manual.html) contains no spatial information at all). In other cases, this software could be improved to better handle these formats. It is open source, so feel free to contribute. However, due to these limitations, one should take care using this software.
  - The NIfTI format is explicitly designed to store spatial images. Some supported formats handle a much wider range of data. For example, Interfile can encode both raw PET data as well as reconstructed PET spatial images. The NIfTI format is not well suited for the former, though it can cope with the latter.
 
 ## Compiling
@@ -72,8 +71,7 @@ i2nii should automatically detect and convert the following image formats. Be aw
  - [NIfTI](https://brainder.org/2012/09/23/the-nifti-file-format/)(.hdr/.nii/.nii.gz/.voi).
  - [NRRD](http://teem.sourceforge.net/nrrd/format.html)(.nhdr/.nrrd).
  - [POV-Ray Density_File](https://www.povray.org/documentation/view/3.6.1/374/)(.df3).
- - [TIFF](https://en.wikipedia.org/wiki/TIFF)(.tif/.tiff/varies).
- - [Spectroscopic Imaging, VIsualization and Computing (SIVIC)](https://radiology.ucsf.edu/research/labs/nelson#accordion-software)(.idf).
+ - [Spectroscopic Imaging, Visualization and Computing (SIVIC)](https://radiology.ucsf.edu/research/labs/nelson#accordion-software)(.idf).
  - [Stimulate Sdt](https://www.cmrr.umn.edu/stimulate/stimUsersGuide/node57.html)(.spr/.sdt)
  - [Vaa3D](https://github.com/Vaa3D)(.v3draw).
  - [VTK Legacy Voxel Format](https://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf)(.vtk).
