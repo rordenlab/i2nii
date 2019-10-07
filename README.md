@@ -18,12 +18,14 @@ You can get i2nii using two methods:
 ## Usage
 
 ```
-Chris Rorden's i2nii v1.0.20190909
+Chris Rorden's i2nii v1.0.20191007
 usage: i2nii [options] <in_file(s)>
  Options :
- -z : gz compress images (y/n, default n)
  -h : show help
  -o : output directory (omit to save to input folder)
+ -r : rotation (l/r/n, LAS/RAS/native default n)
+       caution: rotation can disrupt slice time correction
+ -z : gz compress images (y/n, default n)
  Examples :
   i2nii -z y ecat.v
   i2nii img1.pic img2.pic
@@ -38,15 +40,26 @@ This software is provided as is. There are clear limitations.
 
  - Many of the file formats are poorly documented. In particular with respect to spatial scale and orientation. Some of these problems are inherent to the format (e.g. [Blender Voxel data](http://pythology.blogspot.com/2014/08/you-can-do-cool-stuff-with-manual.html) contains no spatial information at all). In other cases, this software could be improved to better handle these formats. It is open source, so feel free to contribute. However, due to these limitations, one should take care using this software.
  - The NIfTI format is explicitly designed to store spatial images. Some supported formats handle a much wider range of data. For example, Interfile can encode both raw PET data as well as reconstructed PET spatial images. The NIfTI format is not well suited for the former, though it can cope with the latter.
+ 
+ Note that the `-r` option allows you to specify whether the raw data is stored in [native, LAS, or RAS](https://brainder.org/2012/09/23/the-nifti-file-format/). If rotation is requested, the voxel data is copied losslessly. The image dimensions are permuted and flipped to the orthogonal orientation that best matches the desired storage order. For oblique acquisitions (where the slice angulation is not orthogonal to the scanner bore), the residual rotation is stored in the NIfTI SForm and QForm. Therefore, for software that uses the SForm and QForm information, each of these storage orientations is identical. The pupose of these commands is for simple tools that require specified spatial storage. A limitation of this option is that many supported image formats do not record spatial orientation (as reported in the previous paragraph). 
 
 ## Compiling
 
 It is generally recommended that download a pre-compiled executable (see previous section). However, you can compile your own copy from source code.
 
  - Download and install [FreePascal for your operating system](https://www.freepascal.org/download.html). For Debian-based unix this may be as easy as `sudo apt-get install fp-compiler`. For other operating systems, you may simply want to install FreePascal from the latest [Lazarus distribution](https://sourceforge.net/projects/lazarus/files/).
- - From the terminal, go inside the directory with the source files and run the following commands to build and test your compilation:
-   * fpc i2nii
-   * ./i2nii -o ./test/sivic.idf
+ - From the terminal, go inside the directory with the source files and run the following commands to build and validate your compilation:
+
+```
+fpc i2nii
+./i2nii -o ./test/afni.BRIK+orig.BRIK
+./i2nii ./test/mgh.mgz 
+./i2nii ./test/mha.mha 
+./i2nii ./test/nrrd.nhdr
+./i2nii -o ./test/sivic.idf
+./i2nii ./test/spr.spr
+./i2nii ./test/vtk.vtk
+```
  
 
 ## Supported Image Formats
@@ -63,7 +76,7 @@ i2nii should automatically detect and convert the following image formats. Be aw
  - [FreeSurfer MGH/MGZ Volume](https://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial/MghFormat)(.mgh/.mgz).
  - [Guys Image Processing Lab](http://rview.colin-studholme.net/rview/rv9manual/fileform.html#GIPL)(.gipl).
  - [ICS Image Cytometry Standard](https://onlinelibrary.wiley.com/doi/epdf/10.1002/cyto.990110502)(.ics).
- - [INterfile](https://www.ncbi.nlm.nih.gov/pubmed/2616095)(.varies, limited support).
+ - [Interfile](https://www.ncbi.nlm.nih.gov/pubmed/2616095)(.varies, limited support).
  - [ITK MHA/MHD](https://itk.org/Wiki/MetaIO/Documentation)(.mha/.mhd).
  - [MRTrix Volume](https://mrtrix.readthedocs.io/en/latest/getting_started/image_data.html)(.mif/.mih; not all variants supported).
  - [NIfTI](https://brainder.org/2012/09/23/the-nifti-file-format/)(.hdr/.nii/.nii.gz/.voi).

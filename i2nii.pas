@@ -13,29 +13,24 @@ uses
   cthreads, 
   {$ENDIF}
   {$IFDEF GZIP}zstream, gziputils, {$ENDIF}
-  DateUtils, nifti_types,Classes, SysUtils, nifti_foreign;
+  VectorMath, SimdUtils, nifti_types, 
+  DateUtils, Classes, SysUtils, nifti_foreign, nifti_orient; //StrUtils,
 
 const
     kEXIT_SUCCESS = 0;
     kEXIT_FAIL = 1;
     kEXIT_PARTIALSUCCESS = 2; //wrote some but not all files
-    
-type   
-  TUInt32s = array of uint32;
-  TInt32s = array of int32;
-  TUInt16s = array of uint16;
-  TInt16s = array of int16;
-  TUInt8s = array of uint8;
-  TInt8s = array of int8;
-  TFloat32s = array of single;
-  TFloat64s = array of double;
+    kREORIENT_NATIVE = 0;
+    kREORIENT_LEFTTORIGHT = 1; //sform= [1 0 0 ...
+    kREORIENT_RIGHTTOLEFT = 2; //sform= [-1 0 0 ...
+
 
 procedure printf(s: string);
 begin
      writeln(s);
 end;
 
-procedure SwapImg(var  rawData: TUInt8s; bitpix: integer);
+procedure SwapImg(var rawData: TUInt8s; bitpix: integer);
 var
    i16s: TInt16s;
    i32s: TInt32s;
@@ -366,8 +361,8 @@ begin
  NiftiOutName := fnm;
  lExt := uppercase(extractfileext(NiftiOutName));
  if (lExt = '.GZ') or (lExt = '.VOI') then begin  //save gz compressed
-    if (lExt = '.GZ') then
-       NiftiOutName := ChangeFileExt(NiftiOutName,'.nii.gz'); //img.gz -> img.nii.gz
+    //if (lExt = '.GZ') then
+    //   NiftiOutName := ChangeFileExt(NiftiOutName,'.nii.gz'); //img.gz -> img.nii.gz
     zStream := TGZFileStream.Create(NiftiOutName, gzopenwrite);
     zStream.CopyFrom(mStream, mStream.Size);
     zStream.Free;
@@ -380,13 +375,12 @@ begin
  FileMode := fmOpenRead;
 end;
 
-function convert2nii(ifnm, outDir: string; isGz: boolean): boolean;
+function convert2nii(ifnm, outDir: string; isGz: boolean; reorient: integer): boolean;
 var
   FileName: string;
   lHdr: TNIFTIhdr;
   Stream : TFileStream;
   gzBytes, volBytes, FSz: int64;
-  
   ok, swapEndian, isDimPermute2341: boolean;
   rawData: TUInt8s;
 begin
@@ -468,7 +462,11 @@ begin
      planar3D2RGB8(rawData, lHdr);
      if isDimPermute2341 then
         DimPermute2341(rawData, lHdr);
+     if (reorient <> kREORIENT_NATIVE) then
+        SaveRotated(rawData, lHdr, reorient = kREORIENT_RIGHTTOLEFT);
      FileName := outDir +  ExtractFileName(FileName);
+     //if AnsiContainsText(ExtractFileName(FileName), '.v.hdr') then
+     //   FileName := changefileext(FileName, ''); //Siemens ECAT is filename.v.hdr, not required as readForeignHeader returns image name (filename.v)
      FileName := changefileext(FileName, '.nii');
      if isGz then
         FileName := FileName + '.gz';
@@ -491,9 +489,11 @@ begin
     writeln('Chris Rorden''s'+kIVers);
     writeln(format('usage: %s [options] <in_file(s)>', [exeName]));
     writeln(' Options :');
-    writeln(' -z : gz compress images (y/n, default n)');
     writeln(' -h : show help');
     writeln(' -o : output directory (omit to save to input folder)');
+    writeln(' -r : rotation (l/r/n, LAS/RAS/native default n)');
+    writeln('       caution: rotation can disrupt slice time correction');
+    writeln(' -z : gz compress images (y/n, default n)');
     writeln(' Examples :');
     writeln(format('  %s -z y ecat.v', [ExeName]));
     writeln(format('  %s img1.pic img2.pic', [ExeName]));
@@ -523,7 +523,7 @@ var
     isGz: boolean = false;
     isShowHelp: boolean = false;
     startTime : TDateTime;
-
+    reorient: integer = kREORIENT_NATIVE;
 Begin
     startTime := Now;
     i := 1;
@@ -533,7 +533,7 @@ Begin
         if length(s) < 1 then continue; //possible?
         if s[1] <> '-' then begin
             nAttempt := nAttempt + 1;
-            if convert2nii(s, outDir, isGz) then
+            if convert2nii(s, outDir, isGz, reorient) then
                 nOK := nOK + 1;
             continue;
         end;
@@ -550,10 +550,19 @@ Begin
         v := ParamStr(i);
         i := i + 1;
         if length(v) < 1 then continue; //e.g. 'i2nii -o ""'
-        if c =  'Z' then
-            isGz := upcase(v[1]) = 'Y';
         if c =  'O' then
             outDir := v;
+        if c = 'R' then begin
+            if upcase(v[1]) = 'N' then
+                reorient := kREORIENT_NATIVE;
+            if upcase(v[1]) = 'R' then
+                reorient := kREORIENT_LEFTTORIGHT;
+            if upcase(v[1]) = 'L' then
+                reorient := kREORIENT_RIGHTTOLEFT;    
+        end;
+        if c =  'Z' then
+            isGz := upcase(v[1]) = 'Y';
+
     end; //while
     if (ParamCount = 0) or (isShowHelp) then
         ShowHelp;

@@ -23,7 +23,7 @@ uses
  nifti_types,  sysutils, classes, StrUtils;//2015! dialogsx
 
 const
-    kIVers = ' i2nii v1.0.20190909';
+    kIVers = ' i2nii v1.0.20191007';
 
 {$IFDEF GL10}
 procedure NII_Clear (out lHdr: TNIFTIHdr);
@@ -1854,7 +1854,7 @@ function readVTKHeader (var fname: string; var nhdr: TNIFTIhdr; var gzBytes: int
 label
    666;
 var
-   f: TFByte;//TextFile;
+   f: TFByte;
    strlst: TStringList;
    str: string;
    i, num_vox: integer;
@@ -1872,6 +1872,10 @@ begin
   FileMode := fmOpenRead;
   {$IFDEF FPC} Reset(f,1); {$ELSE} Reset(f); {$ENDIF}
   ReadLnBin(f, str); //signature: '# vtk DataFile'
+  if (pos('<?XML VERSION=', UpperCase(str)) > 0) or (pos('<VTKFile"', str) = 1) then begin
+     NSLog('Only able to read legacy VTK files, not XML files "'+fname+'"');
+     goto 666;
+  end;
   if pos('VTK', UpperCase(str)) <> 3 then begin
     NSLog('Not a VTK file');
     goto 666;
@@ -3240,7 +3244,9 @@ begin
        nhdr.srow_y[0], nhdr.srow_y[1], nhdr.srow_y[2], nhdr.srow_y[3],
         nhdr.srow_z[0], nhdr.srow_z[1], nhdr.srow_z[2], nhdr.srow_z[3] ]));
 
-end;
+end;*)
+
+(*
 
 procedure m33 (m: mat33);
 begin
@@ -3465,7 +3471,8 @@ begin
      if s = 'Z' then result := 3;
 end;
 
-procedure lpi2ras(var nhdr: TNIFTIhdr);
+
+procedure lpi2ras(var nhdr: TNIFTIhdr; xyzmm1, xyzmmMax:  vect3);
 begin
     nhdr.srow_x[0] := -nhdr.srow_x[0];
     nhdr.srow_y[1] := -nhdr.srow_y[1];
@@ -3473,7 +3480,43 @@ begin
     nhdr.srow_x[3] := -nhdr.srow_x[3];
     nhdr.srow_y[3] := -nhdr.srow_y[3];
     nhdr.srow_z[3] := -nhdr.srow_z[3]; 
+    if xyzmm1[0] = kNaNSingle then begin
+        NSLog('Warning: origin not set, "image info" tags not found');
+        exit;
+    end;
+    if (abs(xyzmm1[1]-xyzmmMax[1]) > 0.01) or (abs(xyzmm1[2]-xyzmmMax[2]) > 0.01)  then begin
+        NSLog('Warning: origin not set, "image info" suggest slices not orthogonal with scanner bore.');
+        exit;    
+    end;
+    nhdr.srow_x[3] := -xyzmm1[1];
+    nhdr.srow_y[3] := -xyzmm1[2];
+    nhdr.srow_z[3] := xyzmm1[0]; 
+    //NSLog(format('--> %g %g %g',[nhdr.srow_x[3], nhdr.srow_y[3], nhdr.srow_z[3]]));
     //Report_Mat(nhdr);   
+end;
+
+function SiemensImageInfo(tag, val: string; out xyzmm: vect3): integer;
+//e.g. for
+// image info[99]:={98,-253.016,-408.116,-655.193...
+// tag = 'image info[99]', val ] '{98,-25...'
+// slice is 98, xyzmm[0,1,2]= -253,-408,-655 
+var
+    sList : TStringList;
+begin
+    result := 0;
+    if (val[1] <> '{') or (val[length(val)] <> '}') then exit;
+    result := getDim(tag);
+    //writeln(inttostr(result)+'->'+val);
+    sList := TStringList.Create;
+    sList.Delimiter := ','; 
+    sList.DelimitedText := copy(val,2,length(val)-2);
+    if sList.Count > 3 then begin
+        xyzmm[0] := strtofloatdef(sList[1],0.0);
+        xyzmm[1] := strtofloatdef(sList[2],0.0);
+        xyzmm[2] := strtofloatdef(sList[3],0.0); 
+        //NSLog(format('%s-> %g %g %g',[val, xyzmm[0],xyzmm[1], xyzmm[2]]));    
+    end;
+    sList.Free;
 end;
 
 function nii_readInterfile (var fname: string; var nhdr: TNIFTIhdr; var swapEndian: boolean): boolean;
@@ -3486,7 +3529,9 @@ var
   i , bpp, dim: integer;
   isLPI, isOK, isUint, isOrigin, isPixDim: boolean;
   tmp, tag, str, errStr, val: string;
-begin
+  slice, sliceMax: integer;
+  xyzmm, xyzmm1, xyzmmMax:  vect3; 
+begin 
   result := false;
    if not fileexists(fname) then exit;
    FileMode := fmOpenRead;
@@ -3498,6 +3543,8 @@ begin
    //read
    isOK := false;
    bpp := 0;
+   sliceMax := -1;
+   xyzmm1[0] := kNaNSingle;
    isOrigin := false;
    isPixDim := false;
    isUint := true;
@@ -3599,7 +3646,16 @@ begin
          if dim = 3 then
             nhdr.srow_z[3] := strtofloatdef(val, 0);
          //nhdr.pixdim[dim] := strtofloatdef(val, 0);
-      end;
+      end; //'first pixel
+      if  PosEx('image info[', tag) > 0 then begin
+            slice := SiemensImageInfo(tag,val,xyzmm);
+            if slice = 1 then
+                xyzmm1 := xyzmm;
+            if slice > sliceMax then begin
+                sliceMax := slice;
+                xyzmmMax := xyzmm;
+            end;
+      end //'image info'
   end; //while not end
   if (nhdr.dim[1] > 0) and (nhdr.dim[2] > 0) and (bpp > 0) then isOK := true;
   if (nhdr.datatype = kDT_FLOAT) then begin
@@ -3614,13 +3670,14 @@ begin
   end;
   if isOK then
      result := true;
-  if not isOrigin then
-    printf('Unable to determine origin');
   if not isPixDim then
     printf('Unable to scaling factor (pixdim)');
   printf(format('Interfile dim %dx%dx%d %dbpp pixdim %.3fx%.3fx%.3f', [nhdr.dim[1], nhdr.dim[2], nhdr.dim[3], bpp, nhdr.pixdim[1], nhdr.pixdim[2], nhdr.pixdim[3]]));
+  //two methods to determine origin: "first pixel offset" or Siemens usage of "image info"
   if isLPI then
-    lpi2ras(nhdr);      
+    lpi2ras(nhdr, xyzmm1, xyzmmMax)
+  else if not isOrigin then
+    printf('Unable to determine origin');    
 666:
     CloseFile(FP);
     Filemode := 2;
@@ -3651,7 +3708,11 @@ begin
    DecimalSeparator := '.';
    {$ENDIF}
   isOK := false;
+  {$IFDEF ENDIAN_LITTLE}
   swapEndian := true;
+  {$ELSE}
+  swapEndian := false;
+  {$ENDIF}
   result := false;
   AssignFile(fp,fname);
   reset(fp);
@@ -3666,18 +3727,33 @@ begin
   while (not EOF(fp))  do begin
       readln(fp,str);
       if length(str) < 1 then continue;
+      sList.Delimiter:=':'; //mango sometimes omits white space between name:value "endian:ieee-le", Slicer always includes white space "numDim: 4"
       sList.DelimitedText := str;
       if sList.Count < 2 then continue;
-      //if posex('numDim:', sList[0]) = 1 then begin
+      //if posex('numDim', sList[0]) = 1 then begin
       //   showmessage('x');
       //end;
-      if posex('dim:', sList[0]) = 1 then begin
+      if posex('endian', sList[0]) = 1 then begin  //endian:ieee-le
+         if posex('-be', sList[1]) > 0 then
+            {$IFDEF ENDIAN_LITTLE}
+            swapEndian := true;
+            {$ELSE}
+            swapEndian := false;
+            {$ENDIF}
+         if posex('-le', sList[1]) > 0 then
+            {$IFDEF ENDIAN_LITTLE}
+            swapEndian := false;
+            {$ELSE}
+            swapEndian := true;
+            {$ENDIF}
+      end;
+      if posex('dim', sList[0]) = 1 then begin
          nhdr.dim[0] := sList.Count - 1;
          isOK := true;
          for i := 1 to (sList.Count - 1) do
              nhdr.dim[i] := strtointdef(sList[i],-1);
       end;
-      if posex('dataType:', sList[0]) = 1 then begin
+      if posex('dataType', sList[0]) = 1 then begin
          if posex('BTYE', sList[1]) = 1 then
             nhdr.datatype := kDT_UINT8  //Mango error
          else if posex('BYTE', sList[1]) = 1 then
@@ -3693,7 +3769,7 @@ begin
               goto 666;
          end;
       end; //dataType
-      if (posex('interval:', sList[0]) = 1) and (sList.Count > 3) then begin
+      if (posex('interval', sList[0]) = 1) and (sList.Count > 3) then begin
          nhdr.pixdim[1] := strtofloatdef(sList[1],1.0);
          nhdr.pixdim[2] := strtofloatdef(sList[2],1.0);
          nhdr.pixdim[3] := strtofloatdef(sList[3],1.0);
@@ -3707,12 +3783,10 @@ begin
          nhdr.srow_z[2] := nhdr.pixdim[3];
 
       end;
-      if (posex('origin:', sList[0]) = 1) and (sList.Count > 3) then begin
+      if (posex('origin', sList[0]) = 1) and (sList.Count > 3) then begin
          nhdr.srow_x[3] := -1 * strtofloatdef(sList[1],1.0);
          nhdr.srow_y[3] := -1 * strtofloatdef(sList[2],1.0);
          nhdr.srow_z[3] := strtofloatdef(sList[3],1.0);
-         //showmessage(format('%g %g %g', [nhdr.srow_x[3], nhdr.srow_y[3], nhdr.srow_z[3]]));
-         //showmessage('xxx');
       end;
   end; //while not end
   if isOK then
@@ -3934,6 +4008,8 @@ begin
        result := nii_readIdf(lFilename, lHdr, swapEndian)
   else if (lExt = '.PIC') then
     result := nii_readpic(lFilename, lHdr)
+  //else if (lExt = '.VTI') then
+  //  result := readVTIHeader(lFilename, lHdr, gzBytes, swapEndian)
   else if (lExt = '.VTK') then
     result := readVTKHeader(lFilename, lHdr, gzBytes, swapEndian)
   else if (lExt = '.MGH') or (lExt = '.MGZ') then
