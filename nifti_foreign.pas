@@ -3528,7 +3528,7 @@ var
   fp: TextFile;
   i , bpp, dim: integer;
   isLPI, isOK, isUint, isOrigin, isPixDim: boolean;
-  tmp, tag, str, errStr, val: string;
+  tmp, tag, str, errStr, val, valu: string;
   slice, sliceMax: integer;
   xyzmm, xyzmm1, xyzmmMax:  vect3; 
 begin 
@@ -3572,14 +3572,15 @@ begin
       tag := lowercase(tag);
       val := copy(str, i+2, maxint);
       val := trim(val);
+      valu := val; //retain case - important for Linux fname 
       val := lowercase(val);
       if length(val) < 1 then continue;
       if PosEx('name of data file', tag) > 0 then begin
-         tmp := val;
+         tmp := valu;
          if not fileexists(tmp) then
-             tmp := ExtractFilePath(fname)+val;
+             tmp := ExtractFilePath(fname)+valu;
          if not fileexists(tmp) then begin
-            NSLog('Unabled to find Interfile image "'+val+'"');
+            NSLog('Unabled to find Interfile image "'+valu+'"');
             goto 666;
          end;
          fname := tmp;
