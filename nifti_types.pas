@@ -74,6 +74,8 @@ end;//TAnalyzeHdrSection Structure
 
 
  const
+ K_bz2Bytes_headerAndImageCompressed = -4;
+ K_bz2Bytes_onlyImageCompressed = -3;
  K_gzBytes_headerAndImageCompressed = -2;
  K_gzBytes_onlyImageCompressed= -1;
  K_gzBytes_headerAndImageUncompressed= 0;

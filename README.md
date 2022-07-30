@@ -67,25 +67,34 @@ fpc i2nii
 i2nii should automatically detect and convert the following image formats. Be aware that not all these formats have spatial transformations. Further, support for all features of these formats may be incomplete.
 
  - [AFNI Brik](https://afni.nimh.nih.gov/pub/dist/doc/program_help/README.attributes.html)(.head).
+ - [AIM Scanco Medical µCT or HRpQCT](https://www.researchgate.net/publication/320077296_AIMreader_python_implementation_and_examples)(.aim).
  - [Analyze](http://imaging.mrc-cbu.cam.ac.uk/imaging/FormatAnalyze)(.hdr).
  - [Bio-Rad PIC](https://docs.openmicroscopy.org/bio-formats/5.8.2/formats/bio-rad-pic.html)(.pic).
  - [Blender Voxel data](http://pythology.blogspot.com/2014/08/you-can-do-cool-stuff-with-manual.html)(.bvox).
  - [BrainVoyager VMR](https://support.brainvoyager.com/brainvoyager/automation-development/84-file-formats/343-developer-guide-2-6-the-format-of-vmr-files)(.vmr, .v16).
+ - [Concorde/Siemens µPET](https://xmedcon.sourceforge.io/Docs/OptionsMedConFiles)(.img.hdr,.img)
+ - [DAT format](https://www.cg.tuwien.ac.at/courses/Visualisierung/Angaben/Bsp1.html#Volums%20Datensätze)(.dat).
  - [DeltaVision](https://docs.openmicroscopy.org/bio-formats/5.8.2/formats/deltavision.html)(.dv).
  - [ECAT](http://nipy.org/nibabel/reference/nibabel.ecat.html)(.v).
  - [FreeSurfer MGH/MGZ Volume](https://surfer.nmr.mgh.harvard.edu/fswiki/FsTutorial/MghFormat)(.mgh/.mgz).
  - [Guys Image Processing Lab](http://rview.colin-studholme.net/rview/rv9manual/fileform.html#GIPL)(.gipl).
  - [ICS Image Cytometry Standard](https://onlinelibrary.wiley.com/doi/epdf/10.1002/cyto.990110502)(.ics).
  - [Interfile](https://www.ncbi.nlm.nih.gov/pubmed/2616095)(.varies, limited support).
+ - [PVL (Processed VoLume) from Drishti](http://paulbourke.net/dataformats/pvl/)(.nc)
  - [ITK MHA/MHD](https://itk.org/Wiki/MetaIO/Documentation)(.mha/.mhd).
- - [MRTrix Volume](https://mrtrix.readthedocs.io/en/latest/getting_started/image_data.html)(.mif/.mih; not all variants supported).
+ - [MRC volume](https://mrcfile.readthedocs.io/en/latest/usage_guide.html)(.mrc).
+ - [MRTrix volume](https://mrtrix.readthedocs.io/en/latest/getting_started/image_data.html)(.mif/.mih; not all variants supported).
  - [NIfTI](https://brainder.org/2012/09/23/the-nifti-file-format/)(.hdr/.nii/.nii.gz/.voi).
  - [NRRD](http://teem.sourceforge.net/nrrd/format.html)(.nhdr/.nrrd).
+ - [PGM](http://paulbourke.net/dataformats/ppm/)(.pgm).
  - [POV-Ray Density_File](https://www.povray.org/documentation/view/3.6.1/374/)(.df3).
  - [Spectroscopic Imaging, Visualization and Computing (SIVIC)](https://radiology.ucsf.edu/research/labs/nelson#accordion-software)(.idf).
  - [Stimulate Sdt](https://www.cmrr.umn.edu/stimulate/stimUsersGuide/node57.html)(.spr/.sdt)
  - [Vaa3D](https://github.com/Vaa3D)(.v3draw).
+ - [VFF format from ncaa](https://github.com/SlicerRt/SlicerRT/blob/master/VffFileReader/Logic/vtkSlicerVffFileReaderLogic.cxx)(.vff).
  - [VTK Legacy Voxel Format](https://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf)(.vtk).
-
+ - [VTK VTI format](https://vtk.org/Wiki/VTK_XML_Formats)(.vti).
+ - [XRAW MagicaVoxel minecraft](https://ephtracy.github.io/index.html?page=mv_renderer)(.xraw).
+ 
 If your image format is not supported directly by MRIcroGL, you may want to see if it is supported by the [Bio-Formats module](https://docs.openmicroscopy.org/bio-formats/5.9.2/supported-formats.html) of [ImageJ/Fiji](https://fiji.sc). If so, you can open the image with the module and save it as NIfTI or NRRD to read it with MRIcroGL.
 
